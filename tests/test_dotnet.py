@@ -560,13 +560,21 @@ def test_razor_missing_file():
 
 # ── dispatch & detect integration ────────────────────────────────────────────
 
+_DOTNET_EXTS = (
+    ".sln", ".slnx", ".csproj", ".fsproj", ".vbproj", ".xaml", ".razor", ".cshtml",
+    # VB.NET / classic ASP / Web Forms / VB6 (.inc and .cls are content-sniffed,
+    # not statically dispatched, so they get dedicated tests elsewhere).
+    ".vb", ".asp", ".aspx", ".ascx", ".asmx", ".asax", ".master", ".frm", ".bas",
+)
+
+
 def test_dispatch_table():
     from graphify.extract import _get_extractor
-    for ext in (".sln", ".slnx", ".csproj", ".fsproj", ".vbproj", ".xaml", ".razor", ".cshtml"):
+    for ext in _DOTNET_EXTS:
         assert _get_extractor(Path(f"foo{ext}")) is not None, f"{ext} not in dispatch"
 
 
 def test_code_extensions():
     from graphify.detect import CODE_EXTENSIONS
-    for ext in (".sln", ".slnx", ".csproj", ".fsproj", ".vbproj", ".xaml", ".razor", ".cshtml"):
+    for ext in _DOTNET_EXTS:
         assert ext in CODE_EXTENSIONS, f"{ext} missing"

@@ -333,6 +333,10 @@ To remove graphify from all platforms at once: `graphify uninstall` (add `--purg
 |------|-----------|
 | Code (36 tree-sitter grammars) | `.py .ts .mts .cts .js .jsx .tsx .mjs .go .rs .java .c .cpp .cc .cxx .h .hpp .cu .cuh .metal .rb .cs .kt .kts .scala .php .swift .lua .luau .toc .zig .ps1 .psm1 .psd1 .ex .exs .m .mm .jl .vue .svelte .astro .groovy .gradle .dart .v .sv .svh .sql .f .f90 .f95 .f03 .f08 .pas .pp .dpr .dpk .lpr .inc .dfm .lfm .lpk .sh .bash .json .dm .dme .dmi .dmm .dmf .sln .slnx .csproj .fsproj .vbproj .xaml .razor .cshtml` (`.dm`/`.dme` requires `uv tool install graphifyy[dm]`; `.mts`/`.cts` reuse the TypeScript grammar, `.cc`/`.cxx` and CUDA `.cu`/`.cuh` and Metal `.metal` reuse the C++ grammar) |
 | Salesforce Apex | `.cls .trigger` (regex-based; classes, interfaces, enums, methods, triggers, SOQL/DML edges) |
+| VB.NET | `.vb` (regex-based; namespaces, classes/modules/structures/interfaces/enums, `Inherits`/`Implements`, `Imports`, Sub/Function/Property members) |
+| Classic ASP | `.asp` and `.inc` (content-sniffed: an `.inc` with `<%` is classic ASP, otherwise Pascal; regex-based SSI `#include` edges, VBScript classes/procedures, `Server.CreateObject` COM use) |
+| ASP.NET Web Forms | `.aspx .ascx .asmx .asax .master` (regex-based; `Inherits`/`CodeBehind`/`CodeFile` resolved to the real code-behind node, `Import`/`Register` edges, registered custom-control usage, inline `runat="server"` handlers) |
+| Visual Basic 6 | `.cls` (content-sniffed alongside Apex), `.frm`, `.bas` (regex-based; class/form/module members via `Attribute VB_Name`, `Implements`, form controls and `Control_Event` handler links) |
 | Terraform / HCL | `.tf .tfvars .hcl` (requires `uv tool install graphifyy[terraform]`) |
 | MCP configs | `.mcp.json` `mcp.json` `mcp_servers.json` `claude_desktop_config.json` — extracts server nodes, package refs, env var requirements |
 | Package manifests | `apm.yml` `pyproject.toml` `go.mod` `pom.xml` — one canonical package node per package (by name) plus `depends_on` edges, so a package referenced from many manifests is a single hub |

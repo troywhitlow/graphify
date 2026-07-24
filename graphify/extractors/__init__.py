@@ -13,6 +13,7 @@ from typing import Callable
 from graphify.extractors.apex import extract_apex
 from graphify.extractors.bash import extract_bash
 from graphify.extractors.blade import extract_blade
+from graphify.extractors.classic_asp import extract_classic_asp
 from graphify.extractors.dart import extract_dart
 from graphify.extractors.dm import extract_dm, extract_dmf, extract_dmi, extract_dmm
 from graphify.extractors.elixir import extract_elixir
@@ -30,13 +31,17 @@ from graphify.extractors.rust import extract_rust
 from graphify.extractors.sln import extract_sln
 from graphify.extractors.sql import extract_sql
 from graphify.extractors.terraform import extract_terraform
+from graphify.extractors.vb6 import extract_vb6, extract_vb6_form, extract_vb6_module
+from graphify.extractors.vbnet import extract_vbnet
 from graphify.extractors.verilog import extract_verilog
+from graphify.extractors.webforms import extract_webforms
 from graphify.extractors.zig import extract_zig
 
 LANGUAGE_EXTRACTORS: dict[str, Callable[[Path], dict]] = {
     "apex": extract_apex,
     "bash": extract_bash,
     "blade": extract_blade,
+    "classic_asp": extract_classic_asp,
     "dart": extract_dart,
     "delphi_form": extract_delphi_form,
     "dm": extract_dm,
@@ -59,6 +64,11 @@ LANGUAGE_EXTRACTORS: dict[str, Callable[[Path], dict]] = {
     "sln": extract_sln,
     "sql": extract_sql,
     "terraform": extract_terraform,
+    "vb6": extract_vb6,
+    "vb6_form": extract_vb6_form,
+    "vb6_module": extract_vb6_module,
+    "vbnet": extract_vbnet,
     "verilog": extract_verilog,
+    "webforms": extract_webforms,
     "zig": extract_zig,
 }

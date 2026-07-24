@@ -1,0 +1,12 @@
+<%@ Master Language="C#" CodeBehind="sample.master.cs" Inherits="Acme.Web.SiteMaster" %>
+<%@ Register TagPrefix="uc1" TagName="Nav" Src="~/Controls/Nav.ascx" %>
+<!DOCTYPE html>
+<html>
+<head runat="server"><title>Site</title></head>
+<body>
+    <form runat="server">
+        <uc1:Nav runat="server" />
+        <asp:ContentPlaceHolder ID="Main" runat="server" />
+    </form>
+</body>
+</html>
