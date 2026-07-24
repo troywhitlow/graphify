@@ -33,6 +33,7 @@ from graphify.extractors.base import (  # noqa: F401
 from graphify.extractors.apex import extract_apex  # noqa: F401
 from graphify.extractors.bash import extract_bash  # noqa: F401
 from graphify.extractors.blade import extract_blade  # noqa: F401
+from graphify.extractors.classic_asp import extract_classic_asp  # noqa: F401
 from graphify.extractors.csharp import (
     _resolve_cross_file_csharp_imports,
     _resolve_csharp_type_references,
@@ -51,7 +52,10 @@ from graphify.extractors.rust import extract_rust  # noqa: F401
 from graphify.extractors.sln import extract_sln  # noqa: F401
 from graphify.extractors.sql import extract_sql  # noqa: F401
 from graphify.extractors.terraform import extract_terraform  # noqa: F401
+from graphify.extractors.vb6 import extract_vb6, extract_vb6_form, extract_vb6_module  # noqa: F401
+from graphify.extractors.vbnet import extract_vbnet  # noqa: F401
 from graphify.extractors.verilog import extract_verilog  # noqa: F401
+from graphify.extractors.webforms import extract_webforms  # noqa: F401
 from graphify.extractors.zig import extract_zig  # noqa: F401
 from graphify.security import sanitize_metadata
 from graphify.paths import disambiguate_ambiguous_candidates
@@ -4056,8 +4060,17 @@ _DISPATCH: dict[str, Any] = {
     ".xaml": extract_xaml,
     ".razor": extract_razor,
     ".cshtml": extract_razor,
-    ".cls": extract_apex,
+    # .cls is NOT here — it is content-sniffed in _get_extractor (VB6 vs Apex).
     ".trigger": extract_apex,
+    ".vb": extract_vbnet,
+    ".asp": extract_classic_asp,
+    ".aspx": extract_webforms,
+    ".ascx": extract_webforms,
+    ".asmx": extract_webforms,
+    ".asax": extract_webforms,
+    ".master": extract_webforms,
+    ".frm": extract_vb6_form,
+    ".bas": extract_vb6_module,
 }
 
 
@@ -4172,6 +4185,34 @@ def _is_cpp_header(path: Path) -> bool:
     return any(marker in head for marker in _CPP_HEADER_MARKERS)
 
 
+def _classify_inc_file(path: Path) -> Any:
+    """`.inc` is shared by Pascal/Delphi includes and classic-ASP VBScript+HTML
+    fragments (#2112 follow-on). `<%` essentially never appears in a real Pascal
+    include, so it is a strong, low-risk signal; anything without it falls through
+    to extract_pascal exactly as before, preserving existing Pascal `.inc` support."""
+    try:
+        head = path.read_text(encoding="utf-8", errors="replace")[:4096]
+    except OSError:
+        return extract_pascal
+    return extract_classic_asp if "<%" in head else extract_pascal
+
+
+def _classify_cls_file(path: Path) -> Any:
+    """`.cls` is shared by Salesforce Apex and VB6 class modules. The VB6 IDE
+    header `VERSION 1.0 CLASS` (Apex `.cls` never has it) is the primary signal,
+    with `Attribute VB_Name` as an independent fallback; neither present ⇒ default
+    to extract_apex, so existing Salesforce Apex `.cls` support is unaffected."""
+    try:
+        head = path.read_text(encoding="utf-8", errors="replace")[:2048]
+    except OSError:
+        return extract_apex
+    if head.lstrip().startswith("VERSION ") and "CLASS" in head[:64]:
+        return extract_vb6
+    if "Attribute VB_Name" in head:
+        return extract_vb6
+    return extract_apex
+
+
 def _get_extractor(path: Path) -> Any | None:
     """Return the correct extractor function for a file, or None if unsupported."""
     if path.name.lower().endswith(".blade.php"):
@@ -4193,6 +4234,12 @@ def _get_extractor(path: Path) -> Any | None:
     suffix = path.suffix
     if suffix not in _DISPATCH and suffix.lower() in _DISPATCH:
         suffix = suffix.lower()
+    # `.inc` and `.cls` are extension collisions resolved by content-sniff, not
+    # by the static _DISPATCH table (Pascal vs classic-ASP, Apex vs VB6).
+    if suffix.lower() == ".inc":
+        return _classify_inc_file(path)
+    if suffix.lower() == ".cls":
+        return _classify_cls_file(path)
     if suffix == ".h":
         if _is_objc_header(path):
             return extract_objc
